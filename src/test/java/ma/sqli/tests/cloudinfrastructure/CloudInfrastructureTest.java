@@ -102,15 +102,15 @@ public class CloudInfrastructureTest {
         cloud.createMachine("machine2", "Windows", "20gb", "4gb");
 
         // Remember, all machines are inactive by default.
-        assertEquals("machine1:inactive||machine2:inactive", cloud.listStores());
+        assertEquals("machine1:inactive||machine2:inactive", cloud.listMachines());
 
 
         cloud.startMachine("machine1"); // start the machine "machine1"
-        assertEquals("machine1:running||machine2:inactive", cloud.listStores());
+        assertEquals("machine1:running||machine2:inactive", cloud.listMachines());
 
         cloud.startMachine("machine2");
         cloud.stopMachine("machine1"); // stop machine "machine1"
-        assertEquals("machine1:stopped||machine2:running", cloud.listStores());
+        assertEquals("machine1:stopped||machine2:running", cloud.listMachines());
     }
 
     /**
@@ -120,7 +120,7 @@ public class CloudInfrastructureTest {
     public void cannot_launch_already_started_machine() {
         cloud.createMachine("machine1", "Linux", "50gb", "8gb");
         cloud.startMachine("machine1");
-        assertEquals("machine1:running", cloud.listStores());
+        assertEquals("machine1:running", cloud.listMachines());
 
         cloud.startMachine("machine1"); // will throw the exception
     }
@@ -132,7 +132,7 @@ public class CloudInfrastructureTest {
     @Test
     public void can_check_used_disk_and_ram_per_machine() {
         cloud.createMachine("machine1", "Linux", "50gb", "8gb");
-        assertEquals("machine1:inactive", cloud.listStores());
+        assertEquals("machine1:inactive", cloud.listMachines());
 
         assertEquals(0, cloud.usedMemory("machine1"), PRECISION); // Only running machines consume memory
         assertEquals(50, cloud.usedDisk("machine1"), PRECISION); // the disk is always consumed
@@ -180,7 +180,7 @@ public class CloudInfrastructureTest {
     public void can_check_aggregated_data_for_all_machines_and_stores() {
         cloud.createMachine("machine1", "Linux", "50gb", "8gb");
         cloud.createMachine("machine2", "Windows", "20gb", "4gb");
-        assertEquals("machine1:inactive||machine2:inactive", cloud.listStores());
+        assertEquals("machine1:inactive||machine2:inactive", cloud.listMachines());
 
         // globalUsedDisk method should return the used disk of all 
         // machines and stores existing in the cloud, same for globalUsedMemory
@@ -198,21 +198,17 @@ public class CloudInfrastructureTest {
 
         cloud.createStore("myImages");
         cloud.uploadDocument("myImages", "picture.jpeg");
-        // it was like this in the repo :
-        // assertEquals("myImages:picture.jpeg", cloud.listStores()); 
-        // i changed it to :
-        assertEquals("myImages:picture.jpeg||machine1:running||machine2:running", cloud.listStores());
-
+        
         assertEquals(70.100, cloud.globalUsedDisk(), PRECISION);
         assertEquals(12, cloud.globalUsedMemory(), PRECISION);
 
-        // cloud.startMachine("machine1");
-        // assertEquals(70.100, cloud.globalUsedDisk(), PRECISION);
-        // assertEquals(4, cloud.globalUsedDisk(), PRECISION);
+        cloud.stopMachine("machine1");
+        assertEquals(70.100, cloud.globalUsedDisk(), PRECISION);
+        assertEquals(4, cloud.globalUsedMemory(), PRECISION);
 
         cloud.emptyStore("myImages");
         assertEquals(70, cloud.globalUsedDisk(), PRECISION);
-        // assertEquals(4, cloud.globalUsedDisk(), PRECISION);
+        assertEquals(4, cloud.globalUsedMemory(), PRECISION);
     }
 
     // Used only to compare double, you can totally ignored it
