@@ -44,12 +44,13 @@ public class CloudInfrastructure {
             }
             storesList.add(store);
         }
-
+        return String.join("||", storesList);
         // add machines strings to the stores list (using a stream from the values of the map 
         // (a set of machines) to a list of trings)
-        storesList.addAll(machines.values().stream().map(m -> m.toString()).collect(Collectors.toList()));
+        // i removed this after checking the JS version at https://github.com/bacarybruno/e-challenge-sqli-2018
+        // storesList.addAll(machines.values().stream().map(m -> m.toString()).collect(Collectors.toList()));
         
-        return String.join("||", storesList);
+        // return String.join("||", storesList);
     }
 
     public void deleteStore(String storeName) {
@@ -119,5 +120,9 @@ public class CloudInfrastructure {
     public void empty() {
         machines.clear();
         stores.clear();
+    }
+
+    public Object listMachines() {
+        return String.join("||", machines.values().stream().map(m -> m.toString()).collect(Collectors.toList()));
     }
 }
